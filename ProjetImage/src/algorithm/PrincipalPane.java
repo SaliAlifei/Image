@@ -32,6 +32,26 @@ public class PrincipalPane extends BorderPane {
 		// augmente la taille du texte
 		nombreDeMarcheAnalyse.setFont(new Font(30));
 		
+		// permet de centrer les elements
+		BorderPane paneBtnSelectFile = new BorderPane();
+		BorderPane paneBtnAnalyse = new BorderPane();
+		BorderPane paneNombreDeMarcheAnalyse = new BorderPane();
+		paneBtnSelectFile.setPrefSize(200, 150);
+		paneBtnAnalyse.setPrefSize(200, 150);
+		paneNombreDeMarcheAnalyse.setPrefSize(200, 150);
+		paneBtnSelectFile.setCenter(btnSelectFile);
+		paneBtnAnalyse.setCenter(btnAnalyse);
+		paneNombreDeMarcheAnalyse.setCenter(nombreDeMarcheAnalyse);
+		
+		// Couleur et taille des boutons
+		btnAnalyse.setStyle("-fx-background-color: #4CAF50;" +
+							"-fx-font-size: 20px;" +
+							"-fx-background-radius: 6, 5;");
+		
+		btnSelectFile.setStyle("-fx-background-color: #008CBA;" +
+							   "-fx-font-size: 20px;" +
+							   "-fx-background-radius: 6, 5;");
+	
 		// initialisation de l'image de depart
 		this.img= null;
 		try {
@@ -41,6 +61,9 @@ public class PrincipalPane extends BorderPane {
 		}
 		ImageView imgView = new ImageView();
 		imgView.setImage(this.img);
+		imgView.setFitHeight(700);
+		imgView.setFitWidth(600);
+		imgView.setSmooth(true);
 		
 		
 		btnSelectFile.setOnAction((event)->{
@@ -55,6 +78,9 @@ public class PrincipalPane extends BorderPane {
 				*/
 				this.img = new Image("file:"+selectedFile.getAbsolutePath());
 				imgView.setImage(this.img);
+				imgView.setFitHeight(700);
+				imgView.setFitWidth(600);
+				imgView.setSmooth(true);
 			}
 			else {
 				System.out.println("File is not valid !");
@@ -69,9 +95,9 @@ public class PrincipalPane extends BorderPane {
 			nombreDeMarcheAnalyse.setText(""+nbreMarche);
 		});
 		
-		buttonPane.getChildren().add(btnAnalyse);
-		buttonPane.getChildren().add(btnSelectFile);
-		buttonPane.getChildren().add(nombreDeMarcheAnalyse);
+		buttonPane.getChildren().add(paneBtnAnalyse);
+		buttonPane.getChildren().add(paneBtnSelectFile);
+		buttonPane.getChildren().add(paneNombreDeMarcheAnalyse);
 		this.setLeft(imgView);
 		this.setCenter(buttonPane);
 		
