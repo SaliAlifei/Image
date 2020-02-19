@@ -26,7 +26,11 @@ public class Main extends Application {
 	
 	public static int algorithm(BufferedImage imgBuff) {
 		int nbreDeMarche = 0;
-		
+		// regler le contraste
+		// recherche d'un bon seuil
+		// convolution
+		// seuillage
+		// compter le nombre de composantes connexes
 		return nbreDeMarche;
 	}
 }
