@@ -13,7 +13,7 @@ import javax.swing.JLabel;
 public class ImgUtil {
 	
 	/**
-	 * Retourne un bufferedImage correspondant au nom de l'imae passe en parametre. L'image devra se trouver dans le dossier test_images_escaliers
+	 * Retourne un bufferedImage correspondant au nom de l'image passe en parametre. L'image devra se trouver dans le dossier test_images_escaliers
 	 * @param nom
 	 * @return img
 	 */
@@ -124,5 +124,86 @@ public class ImgUtil {
 			}
 		}
 	}
-
+	
+	public static BufferedImage convolution (BufferedImage img, int[][] matConv) throws IOException  {
+		BufferedImage imgConv = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
+		if (matConv[0].length != matConv.length) throw new RuntimeException("La matrice de convolution doit etre carree");
+		int nConv = matConv[0].length;
+		int marge = ((int) (nConv/2));
+				
+		// creer un nv bufferedImage pour gerer les contours
+		BufferedImage imgPlusContours = new BufferedImage(img.getWidth()+(2*marge), img.getHeight()+(2*marge), BufferedImage.TYPE_BYTE_GRAY);
+		for (int w=0; w<img.getWidth(); w++) {
+			for(int h=0; h<img.getHeight(); h++) {
+				int rgb = img.getRGB(w, h)&0xff;
+				int [] color = {rgb,rgb,rgb};
+				imgPlusContours.getRaster().setPixel(w+marge, h+marge, color);
+			}
+		}
+		
+		// concolution sur la nouvelle image
+		
+		for (int w=0; w<img.getWidth(); w++) {
+			for(int h=0; h<img.getHeight(); h++) {
+				int colr = multiplicationIndv(getMatrice(imgPlusContours, w+marge, h+marge, nConv), matConv);
+				int [] color = {colr,colr,colr};
+				imgConv.getRaster().setPixel(w, h, color);
+			}
+		}
+		return imgConv;
+	}
+	
+	/**
+	 * Retourne une matrice de taille "taille x taille" avec le point (x,y) au milieu
+	 * @param img
+	 * @param x
+	 * @param y
+	 * @param taille
+	 * @return
+	 */
+	public static int[][] getMatrice(BufferedImage img, int x, int y, int taille) {
+		if(taille%2 == 0) throw new RuntimeException("Taille doit etre impaire");
+		int[][] mat = new int [taille][taille];
+		int [] depart = { x- ((int) (taille/2)) , y- ((int) (taille/2)) };
+				
+		for (int i=0; i<taille; i++) {
+			for (int j=0; j<taille; j++) {
+				int w = depart[0] + i;
+				int h = depart[1] + j;
+				mat[i][j] = img.getRGB(w, h)&0xff;
+			}
+		}
+		return mat;
+	}
+	
+	/**
+	 * Multiplication terme a terme puis somme
+	 * @param matrice1
+	 * @param matrice2
+	 * @return
+	 */
+	public static int multiplicationIndv(int [][] matrice1, int [][] matrice2) {
+		if ((matrice1.length != matrice2.length) && (matrice1[0].length != matrice2[0].length)) throw new RuntimeException("Matrice non carree"); 
+		int somme = 0;
+		
+		for (int row = 0; row < matrice1.length; row++) {
+            for (int col = 0; col < matrice2[0].length; col++) {
+            	somme += matrice1[row][col] * matrice2[row][col];
+            }
+        }
+		return somme;
+	}
+	
+	/**
+	 * Affiche la matrice entree dans la console
+	 * @param prod
+	 */
+	public static void afficheMatConsole (int[][] prod) {
+        for (int row = 0; row < prod.length; row++) {
+            for (int col = 0; col < prod[row].length; col++) {
+                System.out.print(prod[row][col] + " ");
+            }
+            System.out.println();
+        }
+	}
 }

@@ -2,6 +2,7 @@ package algorithm;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Orientation;
@@ -18,7 +19,7 @@ public class PrincipalPane extends BorderPane {
 	
 	Image img;
 	
-	public PrincipalPane() {
+	public PrincipalPane() throws IOException {
 		
 		// Partie droite de la fenetre
 		FlowPane buttonPane = new FlowPane();
@@ -91,7 +92,12 @@ public class PrincipalPane extends BorderPane {
 		btnAnalyse.setOnAction((event)->{
 			// convertit Image en bufferedImage
 			BufferedImage imgBuff = SwingFXUtils.fromFXImage(this.img, null);
-			int nbreMarche = Main.algorithm(imgBuff);
+			int nbreMarche = 0;
+			try {
+				nbreMarche = Main.algorithm(imgBuff);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			nombreDeMarcheAnalyse.setText(""+nbreMarche);
 		});
 		
