@@ -32,23 +32,32 @@ public class Main extends Application {
 		int seuil = 140;
 		int [][] matriceConv = { {1,0,-1}, {1,0,-1}, {1,0,-1} };
 		
-		// regler le contraste / supprimer le bruit
+		// niveau de gris
+		ImgUtil.enNiveauDeGris(imgBuff);
+		
+		// regler le contraste / Addition
+		
 		
 		// recherche d'un bon seuil / Methode Otsu
 		seuil = ImgUtil.otsuMethod(ImgUtil.histogrammeEn255NivDeGris(imgBuff));
 		
-		// convolution / recherche de contours
+		// Reduction du bruit / Convolution / Gaussian blur (taille du noyau a determiner)
 		
+		
+		// Recherche de contours / Convolution / Sobel Operator
 		ImgUtil.convolution(imgBuff, matriceConv);
 		
 		// remplissage (correction de l'image)
 
+		
 		// seuillage
 		ImgUtil.seuillage(imgBuff, seuil);
 		
 		// remplissage (correction de l'image)
 		
+		
 		// compter le nombre de composantes connexes
+		
 		
 		return nbreDeMarche;
 	}
