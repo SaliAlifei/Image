@@ -125,6 +125,98 @@ public class ImgUtil {
 		}
 	}
 	
+	/**
+	 * Implemente l'algorithme Otsu. Aucune optimisation n'est faite.
+	 * @param histogramme
+	 * @return
+	 */
+	public static int otsuMethod(int [] histogramme) {
+		
+		// varSeuil correspond a la valeur de la variance intra-classe pour le parametre seuil
+		int seuil = 0;
+		double varSeuil = 0;
+		
+		// Pour chaque seuil possible t, la boucle calcule la variance intra-classe. La plus petite valeur de toutes ces variances est affectee a "seuil"
+		
+		for(int t=0; t<256; t++) {
+			// varA et varB designent les variances inter-classes, A et B etant interchangeablement le fond et l'objet
+			int totalA = 0, totalB = 0, totalPixel = 0;
+			double  weightA = 0, weightB =0, moyA = 0, moyB = 0, varA = 0, varB = 0;
+			double varIntra = 0;
+			
+			for(int i=0; i<t; i++) {
+				moyA += i*histogramme[i];
+				totalA += i;
+				weightA += histogramme[i];
+			}	
+			for(int j=t; j<256; j++) {
+				moyB += j*histogramme[j];
+				totalB += j;
+				weightB += histogramme[j];
+			}
+			
+			// calcule les moyennes
+			
+			moyA /= totalA;
+			moyB /= totalB;
+			totalPixel = totalA+totalB;
+			weightA /= totalPixel; 
+			weightB /= totalPixel;
+			
+
+			// calcule la variance
+			
+			for(int i=0; i<t; i++) {
+				varA += ( (i-moyA)*(i-moyA)*histogramme[i] ) / totalA;
+			}		
+			for(int j=t; j<256; j++) {
+				varB += ( (j-moyB)*(j-moyB)*histogramme[j] ) / totalB;
+			}
+			
+			varIntra = (weightA*varA) + (weightB*varB);
+	
+			if(t == 0) varSeuil =  varIntra;
+			if (varIntra < varSeuil) {
+				varSeuil = varIntra;
+				seuil = t;
+			}
+			System.out.println("**** t = "+t+" ****");
+			System.out.println("TotalA = "+totalA);
+			System.out.println("TotalB = "+totalB);
+			System.out.println("varSeuil : " + varSeuil);
+			System.out.println("varIntra : " + varIntra);
+			System.out.println("seuil : "+ seuil);
+			System.out.println("------");
+		}
+		
+		return seuil;
+	}
+	
+	public static BufferedImage imageHistogramme(int [] histo) {
+
+		// recadrage
+		/*
+		for(int i = 0; i < 256; i++){
+	      histo[i]  = (int) (histo[i]/max(histo))*50;
+		}*/
+		BufferedImage histoBuff = new BufferedImage(256, max(histo), BufferedImage.TYPE_BYTE_GRAY);
+		int[] blanc = {255,255,255,255};
+		for (int w=0; w<histoBuff.getWidth(); w++) {
+			for (int h=histoBuff.getHeight()-1; h> histoBuff.getHeight()-histo[w]; h--) {
+				histoBuff.getRaster().setPixel(w, h, blanc);
+			}
+		}
+		return histoBuff;
+	}
+	
+	public static int max(int [] array) {
+		int maxVal = array[0];
+		for(int i = 0; i < array.length; i++){
+	         if(array[i] >= maxVal)
+	           maxVal = array[i];
+	     }
+		return maxVal;
+	}
 	public static BufferedImage convolution (BufferedImage img, int[][] matConv) throws IOException  {
 		BufferedImage imgConv = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
 		if (matConv[0].length != matConv.length) throw new RuntimeException("La matrice de convolution doit etre carree");

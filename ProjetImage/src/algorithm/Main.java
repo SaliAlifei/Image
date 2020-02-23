@@ -32,14 +32,17 @@ public class Main extends Application {
 		int seuil = 140;
 		int [][] matriceConv = { {1,0,-1}, {1,0,-1}, {1,0,-1} };
 		
-		// regler le contraste
+		// regler le contraste / supprimer le bruit
 		
-		// recherche d'un bon seuil
-		seuil = 0;
+		// recherche d'un bon seuil / Methode Otsu
+		seuil = ImgUtil.otsuMethod(ImgUtil.histogrammeEn255NivDeGris(imgBuff));
 		
-		// convolution
+		// convolution / recherche de contours
+		
 		ImgUtil.convolution(imgBuff, matriceConv);
 		
+		// remplissage (correction de l'image)
+
 		// seuillage
 		ImgUtil.seuillage(imgBuff, seuil);
 		
