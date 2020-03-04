@@ -22,7 +22,7 @@ public class TestImgUtil {
 		 * { {1/9,1/9,1/9}, {1/9,1/9,1/9}, {1/9,1/9,1/9} }
 		 * 
 		 */
-		int [][] matConv = { {1,0,-1}, {1,0,-1}, {1,0,-1} };
+		double [][] matConv = { {1,0,-1}, {1,0,-1}, {1,0,-1} };
 		
 		BufferedImage imgConv = ImgUtil.convolution(img, matConv);
 		ImgUtil.imshow(imgConv);
@@ -54,8 +54,8 @@ public class TestImgUtil {
 
 	public static void testMultiplicationInd() {
 		 
-		int [][] mat = new int[3][3];
-		int [][] mat2 = new int[3][3];
+		double [][] mat = new double [3][3];
+		double [][] mat2 = new double [3][3];
 		
 		mat[0][0] = 1;
 		mat[0][1] = 1;

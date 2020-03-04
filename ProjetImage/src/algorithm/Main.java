@@ -1,7 +1,10 @@
 package algorithm;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
+
+import javax.imageio.ImageIO;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -12,7 +15,47 @@ import utilitaires.ImgUtil;
 public class Main extends Application {
 
 	public static void main(String[] args) throws IOException {
-		launch(args);
+		
+	// --------------- Convolution ----------------
+	 
+		File path = new File("/Users/Salimata/Documents/Fac/Cours/Semestre 6/Images/ImageL3-master/Test_Images/shapesGray.jpg");
+		BufferedImage img = null;
+		try {
+			img = ImageIO.read(path);
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		double [][] matConv = { {1, 0, -1},
+							    {2, 0, -2}, 
+							    {1, 0, -1} };
+		ImgUtil.imshow(img);
+		ImgUtil.imshow(ImgUtil.convolution(img, matConv));
+	
+		
+	/* // --------------- OtsuMethod -------------------
+		
+		
+		File path = new File("/Users/Salimata/Documents/Fac/Cours/Semestre 6/Images/ImageL3-master/Test_Images/shapesGray.jpg");
+		BufferedImage img = null;
+		try {
+			img = ImageIO.read(path);
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+		// BufferedImage img = ImgUtil.chargerImage("1.jpg");
+		int [] histogramme = ImgUtil.histogrammeEn255NivDeGris(img);
+		ImgUtil.imshow(ImgUtil.histToImg(histogramme));
+		
+		int seuil = ImgUtil.otsuMethod(histogramme);
+		ImgUtil.seuillage(img, seuil);
+		ImgUtil.imshow(img);
+
+		
+	*/
+	//	launch(args);
 	}
 	
 	public void start(Stage stage) throws IOException {
@@ -30,7 +73,7 @@ public class Main extends Application {
 
 		int nbreDeMarche = 0;
 		int seuil = 140;
-		int [][] matriceConv = { {1,0,-1}, {1,0,-1}, {1,0,-1} };
+		double [][] matriceConv = { {1,0,-1}, {1,0,-1}, {1,0,-1} };
 		
 		// niveau de gris
 		ImgUtil.enNiveauDeGris(imgBuff);

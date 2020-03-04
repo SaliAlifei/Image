@@ -226,7 +226,7 @@ public class ImgUtil {
 		return img;
 	}
 	
-	public static BufferedImage convolution (BufferedImage img, int[][] matConv) throws IOException  {
+	public static BufferedImage convolution (BufferedImage img, double [][] matConv) throws IOException  {
 		BufferedImage imgConv = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
 		if (matConv[0].length != matConv.length) throw new RuntimeException("La matrice de convolution doit etre carree");
 		int nConv = matConv[0].length;
@@ -236,8 +236,8 @@ public class ImgUtil {
 		BufferedImage imgPlusContours = new BufferedImage(img.getWidth()+(2*marge), img.getHeight()+(2*marge), BufferedImage.TYPE_BYTE_GRAY);
 		for (int w=0; w<img.getWidth(); w++) {
 			for(int h=0; h<img.getHeight(); h++) {
-				int rgb = img.getRGB(w, h)&0xff;
-				int [] color = {rgb,rgb,rgb};
+				double rgb = img.getRGB(w, h)&0xff;
+				double [] color = {rgb,rgb,rgb};
 				imgPlusContours.getRaster().setPixel(w+marge, h+marge, color);
 			}
 		}
@@ -246,8 +246,8 @@ public class ImgUtil {
 		
 		for (int w=0; w<img.getWidth(); w++) {
 			for(int h=0; h<img.getHeight(); h++) {
-				int colr = multiplicationIndv(getMatrice(imgPlusContours, w+marge, h+marge, nConv), matConv);
-				int [] color = {colr,colr,colr};
+				double colr = multiplicationIndv(getMatrice(imgPlusContours, w+marge, h+marge, nConv), matConv);
+				double [] color = {colr,colr,colr};
 				imgConv.getRaster().setPixel(w, h, color);
 			}
 		}
@@ -279,9 +279,9 @@ public class ImgUtil {
 	 * @param taille
 	 * @return
 	 */
-	public static int[][] getMatrice(BufferedImage img, int x, int y, int taille) {
+	public static double[][] getMatrice(BufferedImage img, int x, int y, int taille) {
 		if(taille%2 == 0) throw new RuntimeException("Taille doit etre impaire");
-		int[][] mat = new int [taille][taille];
+		double [][] mat = new double [taille][taille];
 		int [] depart = { x- ((int) (taille/2)) , y- ((int) (taille/2)) };
 				
 		for (int i=0; i<taille; i++) {
@@ -300,9 +300,9 @@ public class ImgUtil {
 	 * @param matrice2
 	 * @return
 	 */
-	public static int multiplicationIndv(int [][] matrice1, int [][] matrice2) {
+	public static double multiplicationIndv(double [][] matrice1, double [][] matrice2) {
 		if ((matrice1.length != matrice2.length) && (matrice1[0].length != matrice2[0].length)) throw new RuntimeException("Matrice non carree"); 
-		int somme = 0;
+		double somme = 0;
 		for (int row = 0; row < matrice1.length; row++) {
             for (int col = 0; col < matrice2[0].length; col++) {
             	somme += matrice1[row][col] * matrice2[row][col];
@@ -311,17 +311,17 @@ public class ImgUtil {
 		return somme;
 	}
 	
-	public static int scale(int nbre, int minAvant, int maxAvant, int minApres, int maxApres) {
+	public static double scale(double nbre, double minAvant, double maxAvant, int minApres, int maxApres) {
 		double nvNbre = 0;
 		nvNbre = ( ((maxApres-minApres)/(maxAvant-minAvant))*(nbre - minAvant) ) + minApres;
-		return ((int) nvNbre);
+		return (nvNbre);
 	}
 	
 	/**
 	 * Affiche la matrice entree dans la console
 	 * @param prod
 	 */
-	public static void afficheMatConsole (int[][] prod) {
+	public static void afficheMatConsole1 (int[][] prod) {
         for (int row = 0; row < prod.length; row++) {
             for (int col = 0; col < prod[row].length; col++) {
                 System.out.print(prod[row][col] + " ");
@@ -329,23 +329,32 @@ public class ImgUtil {
             System.out.println();
         }
 	}
-
-	public static int minImg(BufferedImage img) {
-		int min = 0;
+	
+	public static void afficheMatConsole (double [][] prod) {
+        for (int row = 0; row < prod.length; row++) {
+            for (int col = 0; col < prod[row].length; col++) {
+                System.out.print(prod[row][col] + " ");
+            }
+            System.out.println();
+        }
+	}
+	
+	public static double minImg(BufferedImage img) {
+		double min = 0;
 		for (int w=0; w<img.getWidth(); w++) {
 			for(int h=0; h<img.getHeight(); h++) {
-				int value = img.getRGB(w, h)&0xff;
+				double value = img.getRGB(w, h)&0xff;
 				if (value < min) min = value;
 			}
 		}
 		return min;
 	}
 	
-	public static int maxImg(BufferedImage img) {
-		int max = 0;
+	public static double maxImg(BufferedImage img) {
+		double max = 0;
 		for (int w=0; w<img.getWidth(); w++) {
 			for(int h=0; h<img.getHeight(); h++) {
-				int value = img.getRGB(w, h)&0xff;
+				double value = img.getRGB(w, h)&0xff;
 				if (value > max) max = value;
 			}
 		}
