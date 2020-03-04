@@ -1,6 +1,16 @@
 package utilitaires;
 
+import java.awt.Transparency;
+import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferFloat;
+import java.awt.image.PixelInterleavedSampleModel;
+import java.awt.image.Raster;
+import java.awt.image.SampleModel;
+import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
 
@@ -193,6 +203,7 @@ public class ImgUtil {
 		
 		return seuil;
 	}
+	
 	public static BufferedImage histToImg(int [] histogramme) {
 		// 256*2 = 512
 		int iter = 2 ;
@@ -364,9 +375,319 @@ public class ImgUtil {
 	public static int max(int [] array) {
 		int maxVal = array[0];
 		for(int i = 0; i < array.length; i++){
-	         if(array[i] >= maxVal)
+	         if(array[i] > maxVal)
 	           maxVal = array[i];
 	     }
 		return maxVal;
 	}
+	
+	public static BufferedImage convolve(BufferedImage img, int[][] mask, int mask_size) {
+		
+		int rows = img.getHeight();
+		int cols = img.getWidth();
+		
+		BufferedImage output = getFloatBuuffredImage(cols, rows);
+		
+			
+		for(int i=1; i<rows-1 ;i++){
+	        for(int j=1; j<cols-1 ;j++){
+	        	
+	            float conv_pix=0;
+	            for(int x=-1; x<2;x++){
+	                for(int y=-1;y<2;y++){
+	                	float pixel = (float) ((img.getRGB(j+y, i+x) >> 16) & 0xff);
+	                	conv_pix = conv_pix + (pixel * mask[x+1][y+1]);
+	                	//System.out.println("\tmask " + mask[x+1][y+1] + "; conv pix " +conv_pix);
+	                }
+	            }
+	            //System.out.println("; pixel value = " + conv_pix);
+	            float[] new_pixel_value = {conv_pix, conv_pix, conv_pix, 255};
+	            output.getRaster().setPixel(j, i, new_pixel_value);
+	        }
+	    }
+		
+		return output;
+	}
+	
+	public static BufferedImage getFloatBuuffredImage(int w, int h) {
+        int bands = 4; // 4 bands for ARGB, 3 for RGB etc
+        int[] bandOffsets = {0, 1, 2, 3}; // length == bands, 0 == R, 1 == G, 2 == B and 3 == A
+
+        // Create a TYPE_FLOAT sample model (specifying how the pixels are stored)
+        SampleModel sampleModel = new PixelInterleavedSampleModel(DataBuffer.TYPE_FLOAT, w, h, bands, w  * bands, bandOffsets);
+        // ...and data buffer (where the pixels are stored)
+        DataBuffer buffer = new DataBufferFloat(w * h * bands);
+
+        // Wrap it in a writable raster
+        WritableRaster raster = Raster.createWritableRaster(sampleModel, buffer, null);
+
+        // Create a color model compatible with this sample model/raster (TYPE_FLOAT)
+        // Note that the number of bands must equal the number of color components in the 
+        // color space (3 for RGB) + 1 extra band if the color model contains alpha 
+        ColorSpace colorSpace = ColorSpace.getInstance(ColorSpace.CS_sRGB);
+        ColorModel colorModel = new ComponentColorModel(colorSpace, true, false, Transparency.TRANSLUCENT, DataBuffer.TYPE_FLOAT);
+
+        // And finally create an image with this raster
+        BufferedImage image = new BufferedImage(colorModel, raster, colorModel.isAlphaPremultiplied(), null);
+
+        //System.out.println("image = " + image);
+        
+        return image;
+	}
+
+	/**
+	 * compte le nombre de ligne d'un texte (ou le nombre de marche)
+	 * @param img
+	 * @param interlignemin
+	 * @param interlignemax
+	 * @param nbPix
+	 * @return
+	 */
+	public static int nbLignes(BufferedImage img, int interlignemin, int interlignemax, int nbPix) throws IOException {
+		int nbLignes=0;
+		int[] tab = histProj(img);
+		int[] tab2 = new int[tab.length];
+
+		for(int i=0;i<tab.length;i++) {
+			if (tab[i]>nbPix)
+				tab2[i]=nbPix;
+			else
+				tab2[i]=0;
+		}
+		imshow(ImgUtil.histogrammeProjection(img, tab2));
+
+		int debut=0,fin=0;
+		if (tab2[1]==nbPix && tab2[2]==nbPix) {
+			nbLignes ++;
+			debut=1;
+		}
+		for(int i=1;i<tab2.length;i++) {
+			if (tab2[i]==0 && tab2[i-1]==nbPix) {
+				debut=i;
+			}
+			if (tab2[i]==nbPix && tab2[i-1]==0) {
+				fin=i;
+				if (fin-debut>interlignemin && fin-debut<interlignemax) {
+					nbLignes++;
+				}
+
+
+			}
+		}
+		return nbLignes;
+	}
+	
+	/**
+	 * renvoie le tableau de l'hstogramme de projection
+	 * @param img
+	 * @return
+	 */
+	public static int[] histProj(BufferedImage img) {
+		int tab[]=new int[img.getHeight()];
+		for(int i=0;i<tab.length;i++) {
+			tab[i]=0;
+		}
+		for (int y = 0; y < img.getHeight() ; y++){
+			for (int x = 0; x < img.getWidth(); x++){
+				int p = img.getRGB(x,y); // r�cup�ration des couleurs RGB du pixel a la position (x, y)
+				int r = (p>>16)&0xff;
+				if (r==0)
+					tab[y]+=1;
+			}
+		}
+		return tab;
+	}
+	
+	/**
+	 * affiche l'histogramme de projection
+	 * @param img
+	 * @param tab
+	 * @return
+	 */
+	public static BufferedImage histogrammeProjection(BufferedImage img, int[] tab) {
+
+		BufferedImage hist = zeros(img.getHeight(),max(tab));
+		int[] blanc = {255,255,255,255};
+		for (int y = 0; y < hist.getHeight() ; y++){
+			for (int x=0; x<tab[y]; x++){
+				hist.getRaster().setPixel(x, y, blanc);
+			}
+		}
+		return hist;
+	}
+	
+	/**
+	 * etire l'histogramme d'une image et retourne l'image avec ces changements
+	 * @param img
+	 * @return
+	 */
+	public static BufferedImage etir(BufferedImage img) {
+		int tab[]=new int[256];
+		for(int i=0;i<tab.length;i++) {
+			tab[i]=0;
+		}
+		for (int y = 0; y < img.getHeight() ; y++){
+			for (int x = 0; x < img.getWidth(); x++){
+				int p = img.getRGB(x,y); // r�cup�ration des couleurs RGB du pixel a la position (x, y)
+				int r = (p>>16)&0xff;
+				tab[r]+=1;
+			}
+		}
+		int i=0;
+		while(tab[i]==0)
+			i++;
+		int minG = i;
+		i=255;
+		while(tab[i] == 0)
+			i--;
+		int maxG= i;
+		int[] c = {255,255,255,255};
+		for (int y = 0; y < img.getHeight() ; y++){
+			for (int x = 0; x < img.getWidth(); x++){
+				int p = img.getRGB(x,y); // r�cup�ration des couleurs RGB du pixel a la position (x, y)
+				int r = (p>>16)&0xff;
+				c[0]= ((r-minG)*255)/(maxG-minG);
+				c[1]=c[0];
+				c[2]=c[0];
+				img.getRaster().setPixel(x, y, c);
+			}
+		}
+		return img;
+	}
+	
+	/**
+	 * ne marche pas
+	 * @param img
+	 * @return
+	 */
+	static BufferedImage egalisation(BufferedImage img) {
+		
+		// contourner le warning
+		int nbNiv = 0;
+		int nbPix = nbNiv;
+		nbPix = img.getHeight()*img.getWidth();
+		
+		int[] tab = histogrammeEn255NivDeGris(img);
+		for (int i=0;i<tab.length;i++) {
+			if (tab[i]!=0)
+				nbNiv++;
+		}
+
+		int[] C = histCum(img);
+
+		int[] c = {255,255,255,255};
+		for (int y = 0; y < img.getHeight() ; y++){
+			for (int x = 0; x < img.getWidth(); x++){
+				int p = img.getRGB(x,y); // r�cup�ration des couleurs RGB du pixel a la position (x, y)
+				int r = (p>>16)&0xff;
+				//c[0]= max(0,(255*(nbNiv/nbPix)*C[r])-1);
+				c[0]= (C[r]/nbPix)*255;
+				c[1]=c[0];
+				c[2]=c[0];
+				img.getRaster().setPixel(x, y, c);
+			}
+		}
+		return img;
+	}
+	
+	/**
+	 * retourne un tableau histogramme cummul�
+	 * @param img
+	 * @return
+	 */
+	static int[] histCum(BufferedImage img) {
+		int tab[]=new int[256];
+		for(int i=0;i<tab.length;i++) {
+			tab[i]=0;
+		}
+		for (int y = 0; y < img.getHeight() ; y++){
+			for (int x = 0; x < img.getWidth(); x++){
+				int p = img.getRGB(x,y); // r�cup�ration des couleurs RGB du pixel a la position (x, y)
+				int r = (p>>16)&0xff;
+				tab[r]+=1;
+			}
+		}
+		for(int i=1;i<tab.length;i++) {
+			tab[i]+=tab[i-1];
+		}
+
+		return tab;
+	}
+
+	/**
+	 * normalise un histogramme et retourne l'image de l'histogramme
+	 * @param tab
+	 * @return
+	 */
+	public static BufferedImage histogrammeNormalise(int[] tab) {
+		int max=max(tab);
+		int histn[]=new int[256];
+		for (int i=0;i<tab.length;i++) {
+			histn[i]=(tab[i]*100)/max;
+		}
+
+
+		BufferedImage hist = zeros(100,256);
+		int[] blanc = {255,255,255,255};
+		for (int x = 0; x < hist.getWidth() ; x++){
+			for (int y=99; y>100-histn[x]; y--){
+				hist.getRaster().setPixel(x, y, blanc);
+			}
+		}
+		return hist;
+	}
+
+	/**
+	 * retourne l'image de l'histogramme cumul�
+	 * @param tab
+	 * @return
+	 */
+	public static BufferedImage histogrammeCumule (int[] tab) {
+		int max=max(tab);
+		int histn[]=new int[256];
+		for (int i=0;i<tab.length;i++) {
+			histn[i]=(tab[i]*100)/max;
+		}
+
+		BufferedImage hist = zeros(100,256);
+		int[] blanc = {255,255,255,255};
+		for (int x = 0; x < hist.getWidth() ; x++){
+			for (int y=99; y>100-histn[x]; y--){
+				hist.getRaster().setPixel(x, y, blanc);
+			}
+		}
+		return hist;
+	}
+	
+	/**
+	 * cr�e une image noire
+	 * @param height
+	 * @param width
+	 * @return
+	 */
+	public static BufferedImage zeros(int height, int width) {
+
+		int[] noir = {0,0,0,255};
+		BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB); 
+		//WritableRaster raster = img.getRaster();
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height ; y++) {
+				img.getRaster().setPixel(x, y, noir);
+			}
+		}
+		return img; 
+	}
+
+	/**
+	 * Duplique l'image passee en parametre
+	 * Lien : https://stackoverflow.com/questions/3514158/how-do-you-clone-a-bufferedimage
+	 * @param bi
+	 * @return
+	 */
+	public static BufferedImage duplicate(BufferedImage img) {
+		 ColorModel cm = img.getColorModel();
+		 boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
+		 WritableRaster raster = img.copyData(null);
+		 return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
+		}
 }

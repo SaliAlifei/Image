@@ -1,4 +1,4 @@
-package imgProcsJava;
+package utilitaires;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -126,27 +126,9 @@ public class UtilImage {
 
 		return img;
 	}
+	
 	/**
-	 * crée une image noire
-	 * @param height
-	 * @param width
-	 * @return
-	 */
-	static BufferedImage zeros(int height, int width) {
-
-		int[] noir = {0,0,0,255};
-		BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB); 
-		//WritableRaster raster = img.getRaster();
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height ; y++) {
-				img.getRaster().setPixel(x, y, noir);
-			}
-		}
-		return img; 
-	}
-
-	/**
-	 * retourne une image dont les élément à partir d'un certain seuil sont colorée de la couleur c
+	 * retourne une image dont les ï¿½lï¿½ment ï¿½ partir d'un certain seuil sont colorï¿½e de la couleur c
 	 * @param img
 	 * @param c
 	 * @return
@@ -155,7 +137,7 @@ public class UtilImage {
 		BufferedImage imgc = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_ARGB);
 		for (int y = 0; y < img.getHeight() ; y++){
 			for (int x = 0; x < img.getWidth(); x++){
-				int p = img.getRGB(x,y); // récupération des couleurs RGB du pixel a la position (x, y)
+				int p = img.getRGB(x,y); // rï¿½cupï¿½ration des couleurs RGB du pixel a la position (x, y)
 				int r = (p>>16)&0xff; 
 				if (r==0)
 					imgc.setRGB(x,y,c.getRGB());
@@ -167,7 +149,7 @@ public class UtilImage {
 	}
 
 	/**
-	 * crée une image dégradée de gris
+	 * crï¿½e une image dï¿½gradï¿½e de gris
 	 * @param height
 	 * @param width
 	 * @return
@@ -197,7 +179,7 @@ public class UtilImage {
 		int[] blanc = {255,255,255,255};
 		for (int y = 0; y < img.getHeight() ; y++){
 			for (int x = 0; x < img.getWidth(); x++){
-				int p = img.getRGB(x,y); // récupération des couleurs RGB du pixel a la position (x, y)
+				int p = img.getRGB(x,y); // rï¿½cupï¿½ration des couleurs RGB du pixel a la position (x, y)
 				int r = (p>>16)&0xff; 
 				if (r<seuil)
 					img.getRaster().setPixel(x, y, noir);
@@ -220,7 +202,7 @@ public class UtilImage {
 		int[] blanc = {255,255,255,255};
 		for (int y = 0; y < img.getHeight() ; y++){
 			for (int x = 0; x < img.getWidth(); x++){
-				int p = img.getRGB(x,y); // récupération des couleurs RGB du pixel a la position (x, y)
+				int p = img.getRGB(x,y); // rï¿½cupï¿½ration des couleurs RGB du pixel a la position (x, y)
 				int r = (p>>16)&0xff; 
 				if (r<seuilbas || r>seuilhaut)
 					img.getRaster().setPixel(x, y, blanc);
@@ -270,7 +252,7 @@ public class UtilImage {
 		}
 		for (int y = 0; y < img.getHeight() ; y++){
 			for (int x = 0; x < img.getWidth(); x++){
-				int p = img.getRGB(x,y); // récupération des couleurs RGB du pixel a la position (x, y)
+				int p = img.getRGB(x,y); // rï¿½cupï¿½ration des couleurs RGB du pixel a la position (x, y)
 				int r = (p>>16)&0xff;
 				tab[r]+=1;
 			}
@@ -280,153 +262,9 @@ public class UtilImage {
 		return tab;
 	}
 
-	/**
-	 * normalise un histogramme et retourne l'image de l'histogramme
-	 * @param tab
-	 * @return
-	 */
-	static BufferedImage histogrammeNormalisé(int[] tab) {
-		int max=maxTab(tab);
-		int histn[]=new int[256];
-		for (int i=0;i<tab.length;i++) {
-			histn[i]=(tab[i]*100)/max;
-		}
-
-
-		BufferedImage hist = zeros(100,256);
-		int[] blanc = {255,255,255,255};
-		for (int x = 0; x < hist.getWidth() ; x++){
-			for (int y=99; y>100-histn[x]; y--){
-				hist.getRaster().setPixel(x, y, blanc);
-			}
-		}
-		return hist;
-	}
 
 	/**
-	 * retourne un tableau histogramme cummulé
-	 * @param img
-	 * @return
-	 */
-	static int[] histCum(BufferedImage img) {
-		int tab[]=new int[256];
-		for(int i=0;i<tab.length;i++) {
-			tab[i]=0;
-		}
-		for (int y = 0; y < img.getHeight() ; y++){
-			for (int x = 0; x < img.getWidth(); x++){
-				int p = img.getRGB(x,y); // récupération des couleurs RGB du pixel a la position (x, y)
-				int r = (p>>16)&0xff;
-				tab[r]+=1;
-			}
-		}
-		for(int i=1;i<tab.length;i++) {
-			tab[i]+=tab[i-1];
-		}
-
-		return tab;
-	}
-
-
-	/**
-	 * retourne l'image de l'histogramme cumulé
-	 * @param tab
-	 * @return
-	 */
-	static BufferedImage histogrammeCumule (int[] tab) {
-
-
-		int max=maxTab(tab);
-		int histn[]=new int[256];
-		for (int i=0;i<tab.length;i++) {
-			histn[i]=(tab[i]*100)/max;
-		}
-
-
-
-		BufferedImage hist = zeros(100,256);
-		int[] blanc = {255,255,255,255};
-		for (int x = 0; x < hist.getWidth() ; x++){
-			for (int y=99; y>100-histn[x]; y--){
-				hist.getRaster().setPixel(x, y, blanc);
-			}
-		}
-		return hist;
-	}
-
-	/**
-	 * ne marche pas
-	 * @param img
-	 * @return
-	 */
-	static BufferedImage egalisation(BufferedImage img) {
-
-		int nbPix = img.getHeight()*img.getWidth();
-		int nbNiv=0;
-
-		int[] tab = hist(img);
-		for (int i=0;i<tab.length;i++) {
-			if (tab[i]!=0)
-				nbNiv++;
-		}
-
-		int[] C = histCum(img);
-
-		int[] c = {255,255,255,255};
-		for (int y = 0; y < img.getHeight() ; y++){
-			for (int x = 0; x < img.getWidth(); x++){
-				int p = img.getRGB(x,y); // récupération des couleurs RGB du pixel a la position (x, y)
-				int r = (p>>16)&0xff;
-				//c[0]= max(0,(255*(nbNiv/nbPix)*C[r])-1);
-				c[0]= (C[r]/nbPix)*255;
-				c[1]=c[0];
-				c[2]=c[0];
-				img.getRaster().setPixel(x, y, c);
-			}
-		}
-
-		return img;
-	}
-
-	/**
-	 * etire l'histogramme d'une image et retourne l'image avec ces changements
-	 * @param img
-	 * @return
-	 */
-	static BufferedImage etir(BufferedImage img) {
-		int tab[]=new int[256];
-		for(int i=0;i<tab.length;i++) {
-			tab[i]=0;
-		}
-		for (int y = 0; y < img.getHeight() ; y++){
-			for (int x = 0; x < img.getWidth(); x++){
-				int p = img.getRGB(x,y); // récupération des couleurs RGB du pixel a la position (x, y)
-				int r = (p>>16)&0xff;
-				tab[r]+=1;
-			}
-		}
-		int i=0;
-		while(tab[i]==0)
-			i++;
-		int minG = i;
-		i=255;
-		while(tab[i] == 0)
-			i--;
-		int maxG= i;
-		int[] c = {255,255,255,255};
-		for (int y = 0; y < img.getHeight() ; y++){
-			for (int x = 0; x < img.getWidth(); x++){
-				int p = img.getRGB(x,y); // récupération des couleurs RGB du pixel a la position (x, y)
-				int r = (p>>16)&0xff;
-				c[0]= ((r-minG)*255)/(maxG-minG);
-				c[1]=c[0];
-				c[2]=c[0];
-				img.getRaster().setPixel(x, y, c);
-			}
-		}
-		return img;
-	}
-
+	
 	/**
 	 * transforme une image couleur en niveau de gris
 	 * @param img
@@ -436,7 +274,7 @@ public class UtilImage {
 		int[] c = {255,255,255,255};
 		for (int y = 0; y < img.getHeight() ; y++){
 			for (int x = 0; x < img.getWidth(); x++){
-				int p = img.getRGB(x,y); // récupération des couleurs RGB du pixel a la position (x, y)
+				int p = img.getRGB(x,y); // rï¿½cupï¿½ration des couleurs RGB du pixel a la position (x, y)
 
 				int r = (p>>16)&0xff; 
 				int g = (p>>8)&0xff; 
@@ -459,7 +297,7 @@ public class UtilImage {
 		int[] c = {255,255,255,255};
 		for (int y = 0; y < img.getHeight() ; y++){
 			for (int x = 0; x < img.getWidth(); x++){
-				int p = img.getRGB(x,y); // récupération des couleurs RGB du pixel a la position (x, y)
+				int p = img.getRGB(x,y); // rï¿½cupï¿½ration des couleurs RGB du pixel a la position (x, y)
 
 				int r = (p>>16)&0xff; 
 				int g = (p>>8)&0xff; 
@@ -474,94 +312,11 @@ public class UtilImage {
 	}
 
 	/**
-	 * renvoie le tableau de l'hstogramme de projection
-	 * @param img
-	 * @return
-	 */
-	static int[] histProj(BufferedImage img) {
-		int tab[]=new int[img.getHeight()];
-		for(int i=0;i<tab.length;i++) {
-			tab[i]=0;
-		}
-		for (int y = 0; y < img.getHeight() ; y++){
-			for (int x = 0; x < img.getWidth(); x++){
-				int p = img.getRGB(x,y); // récupération des couleurs RGB du pixel a la position (x, y)
-				int r = (p>>16)&0xff;
-				if (r==0)
-					tab[y]+=1;
-			}
-		}
+	
 
-
-		return tab;
-	}
 
 	/**
-	 * affiche l'histogramme de projection
-	 * @param img
-	 * @param tab
-	 * @return
-	 */
-	static BufferedImage histogrammeProjection(BufferedImage img, int[] tab) {
-
-		BufferedImage hist = zeros(img.getHeight(),maxTab(tab));
-		int[] blanc = {255,255,255,255};
-		for (int y = 0; y < hist.getHeight() ; y++){
-			for (int x=0; x<tab[y]; x++){
-				hist.getRaster().setPixel(x, y, blanc);
-			}
-		}
-		return hist;
-	}
-
-	/**
-	 * compte le nombre de ligne d'un texte (ou le nombre de marche)
-	 * @param img
-	 * @param interlignemin
-	 * @param interlignemax
-	 * @param nbPix
-	 * @return
-	 */
-	static int nbLignes(BufferedImage img, int interlignemin, int interlignemax, int nbPix) {
-		int nbLignes=0;
-		int[] tab = histProj(img);
-		int[] tab2 = new int[tab.length];
-
-		for(int i=0;i<tab.length;i++) {
-			if (tab[i]>nbPix)
-				tab2[i]=nbPix;
-			else
-				tab2[i]=0;
-		}
-		BufferedImage hist = UtilImage.histogrammeProjection(img, tab2);
-
-		try {
-			UtilImage.imshow(hist);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		int debut=0,fin=0;
-		if (tab2[1]==nbPix && tab2[2]==nbPix) {
-			nbLignes ++;
-			debut=1;
-		}
-		for(int i=1;i<tab2.length;i++) {
-			if (tab2[i]==0 && tab2[i-1]==nbPix) {
-				debut=i;
-			}
-			if (tab2[i]==nbPix && tab2[i-1]==0) {
-				fin=i;
-				if (fin-debut>interlignemin && fin-debut<interlignemax) {
-					nbLignes++;
-				}
-
-
-			}
-		}
-		return nbLignes;
-	}
+	
 
 	/**
 	 * Implemente l'algorithme Otsu. Aucune optimisation n'est faite.
