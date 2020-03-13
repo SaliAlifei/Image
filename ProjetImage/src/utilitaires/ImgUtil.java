@@ -1,5 +1,8 @@
 package utilitaires;
 
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
@@ -7,12 +10,14 @@ import java.awt.image.ColorModel;
 import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferFloat;
+import java.awt.image.ImageObserver;
 import java.awt.image.PixelInterleavedSampleModel;
 import java.awt.image.Raster;
 import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -194,14 +199,160 @@ public class ImgUtil {
 		return seuil;
 	}
 	
-	/*
-	 * Methode Otsu optimisee. L'image d'entree est decoupee en 9 parties auxquelles sont appliquees otsuMethod ().
+	/**
+	 * !!! Retourne une bufferedImage !!!
+	 * Methode Otsu optimisee. L'image d'entree est decoupee en 4 parties auxquelles sont appliquees otsuMethod().
+	 * 
+	 * @param imgNivGris
+	 * @return
 	 */
-	public static int otsu9CarreMethod(int[] histogramme) {
-		int seuil = 0;
+	public static BufferedImage otsuMethod4(BufferedImage imgNivGris) {
+		ArrayList<BufferedImage> array = diviserEn4(imgNivGris);
+		ArrayList<BufferedImage> arrayImgSeuillees = new ArrayList<BufferedImage>();
+
+		for(int i=0; i<array.size(); i++) {
+			seuillage(array.get(i), otsuMethod(histogrammeEn255NivDeGris(array.get(i))));
+			arrayImgSeuillees.add(array.get(i));
+		}
+		BufferedImage imgSeuillee = rassembler(arrayImgSeuillees);
+		return imgSeuillee;
+	}
+	
+	/**
+	 * Retourne un arrayList contenant 4 bufferedImage a peu pres egales
+	 * @param img
+	 * @return
+	 */
+	public static ArrayList<BufferedImage> diviserEn4(BufferedImage img) {
+		ArrayList<BufferedImage> array = new ArrayList<BufferedImage>();
+		int width = img.getWidth();
+		int height = img.getHeight();
+		System.out.println("width : "+width+"\theight: "+height+"\twidht/2 : "+ ((int) width/2) + "\theight/2 : "+((int) height/2));
+		/*
+		 
+		 	*................*..................
+		 	....................................
+		 	....................................
+		 	........1..................2........
+		 	....................................
+		 	....................................
+		 	*................+.................+
+		 	....................................
+		 	....................................
+		 	........3..................4........
+		 	....................................
+		 	.................+.................+
+		 	
+		 
+		*/
+		int[][] debut = { 
+							{0,0}, 							// carre 1
+							{(int) width/2, 0},				// carre 2
+							{0, (int) height/2},			// carre 3
+							{(int) width/2, (int) height/2} // carre 4
+						};
+
+		int[][] fin = { 
+							{(int) width/2, (int) height/2}, // carre 1
+							{width, (int) height/2},		 // carre 2
+							{(int) width/2, height},	     // carre 3
+							{width, height}                  // carre 4
+					  };	
 		
 		
-		return seuil;
+		BufferedImage image1 = new BufferedImage(debut[1][0]-debut[0][0], (int) height/2, BufferedImage.TYPE_BYTE_GRAY);
+		BufferedImage image2 = new BufferedImage(width - ((int) width/2), (int) height/2, BufferedImage.TYPE_BYTE_GRAY);
+		BufferedImage image3 = new BufferedImage(debut[1][0]-debut[0][0], height- ((int) height/2), BufferedImage.TYPE_BYTE_GRAY);
+		BufferedImage image4 = new BufferedImage(width - ((int) width/2), height- ((int) height/2), BufferedImage.TYPE_BYTE_GRAY);
+		
+		for (int w=0; w<width; w++) {
+			for (int h=0; h<height; h++) {
+				
+				int rgb = (img.getRGB(w, h)>>8)&0xff;
+				int [] color = {rgb, rgb, rgb, 255};
+				
+				// 1 et 3
+				if (w>=0 && w<debut[1][0]) {
+					//1
+					if (h>=0 && h<debut[2][1]) {
+						image1.getRaster().setPixel(w, h, color);
+					}
+					//3
+					else {
+						image3.getRaster().setPixel(w, h-((int) height/2), color);
+					}
+				}
+				// 2 et 4
+				else {
+					//2
+					if (h>=0 && h<debut[2][1]) {
+						image2.getRaster().setPixel(w-((int) width/2), h, color);
+					}
+					//4
+					else {
+						image4.getRaster().setPixel(w-((int) width/2), h-((int) height/2), color);
+					}
+				}
+			}
+		}
+		array.add(image1);
+		array.add(image2);
+		array.add(image3);
+		array.add(image4);
+		
+		return array;
+	}
+	
+	/**
+	 * Permet de joindre deux images l'un a cote de l'autre
+	 * @param img1
+	 * @param img2
+	 * @param thiss
+	 * @return
+	 */
+	public static BufferedImage joindreHorizentalement(BufferedImage img1, BufferedImage img2, ImageObserver thiss) {
+		BufferedImage img = new BufferedImage( img1.getWidth() + img2.getWidth(), img1.getHeight(), BufferedImage.TYPE_INT_ARGB ) ;
+		Graphics g = img.getGraphics() ;
+		g.drawImage( img1, 0, 0, thiss) ;
+		g.drawImage( img2, img1.getWidth(), 0, thiss) ;
+		
+		return img;
+	}
+	
+	/**
+	 * Permet de joindre deux images l'un sur l'autre
+	 * Source : https://stackoverflow.com/questions/20826216/copy-two-bufferedimages-into-one-image-side-by-side
+	 * 
+	 * @param img1
+	 * @param img2
+	 * @return
+	 */
+	public static BufferedImage joindreVerticalement(BufferedImage img1, BufferedImage img2) {
+		int width = img1.getWidth();
+	    int height = img1.getHeight() + img2.getHeight();
+	    BufferedImage newImage = new BufferedImage(width, height,
+	        BufferedImage.TYPE_INT_ARGB);
+	    Graphics2D g2 = newImage.createGraphics();
+	    Color oldColor = g2.getColor();
+	    g2.setPaint(Color.WHITE);
+	    g2.fillRect(0, 0, width, height);
+	    g2.setColor(oldColor);
+	    g2.drawImage(img1, null, 0, 0);
+	    g2.drawImage(img2, null, 0, img1.getHeight());
+	    g2.dispose();
+	    return newImage;
+	}
+	
+	/**
+	 * Retourne une image reconstituee a partir de 4 autre images passees en arrayList
+	 * @param array
+	 * @return
+	 */
+	public static BufferedImage rassembler(ArrayList<BufferedImage> array) {
+		return ImgUtil.joindreVerticalement(
+				ImgUtil.joindreHorizentalement(array.get(0), array.get(1), null), 
+				ImgUtil.joindreHorizentalement(array.get(2), array.get(3), null)
+				);
 	}
 	
 	public static BufferedImage histToImg(int [] histogramme) {
@@ -260,12 +411,16 @@ public class ImgUtil {
 				double colr = multiplicationIndv(getMatrice(imgPlusContours, w+marge, h+marge, nConv), matConv);
 				double [] color = {colr,colr,colr};
 				imgConv.getRaster().setPixel(w, h, color);
+				float [] out = new float[3];
+				imgConv.getRaster().getDataElements(w, h, out);
 			}
 		}
 	
-	/*
+	
 		// rescaling
 		
+		/*
+		 
 		int min = minImg(imgConv);
 		int max = maxImg(imgConv);
 		
@@ -277,8 +432,8 @@ public class ImgUtil {
 				imgConv.getRaster().setPixel(w, h, color);
 			}
 		}
-	*/
-		
+	
+		*/
 		return imgConv;
 	}
 		
@@ -454,6 +609,18 @@ public class ImgUtil {
 			else
 				tab2[i]=0;
 		}
+		
+
+		try {
+			File outputfile = new File("/Users/Salimata/Desktop/1_2.jpg");
+			ImageIO.write(img, "jpg", outputfile);
+		} catch (Exception e) {
+			System.out.println("Probleme avec le fichier -- nbLignes -- ");
+			e.printStackTrace();
+		}
+		
+
+
 		imshow(ImgUtil.histogrammeProjection(img, tab2));
 
 		int debut=0,fin=0;

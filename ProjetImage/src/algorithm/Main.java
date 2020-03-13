@@ -2,6 +2,7 @@ package algorithm;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -12,28 +13,6 @@ import utilitaires.ImgUtil;
 public class Main extends Application {
 
 	public static void main(String[] args) throws IOException {
-	
-	/* // --------------- OtsuMethod -------------------
-		
-		
-		File path = new File("/Users/Salimata/Documents/Fac/Cours/Semestre 6/Images/ImageL3-master/Test_Images/shapesGray.jpg");
-		BufferedImage img = null;
-		try {
-			img = ImageIO.read(path);
-		}
-		catch (IOException e) {
-			e.printStackTrace();
-		}
-		// BufferedImage img = ImgUtil.chargerImage("1.jpg");
-		int [] histogramme = ImgUtil.histogrammeEn255NivDeGris(img);
-		ImgUtil.imshow(ImgUtil.histToImg(histogramme));
-		
-		int seuil = ImgUtil.otsuMethod(histogramme);
-		ImgUtil.seuillage(img, seuil);
-		ImgUtil.imshow(img);
-
-		
-	*/
 		launch(args);
 	}
 	
@@ -57,19 +36,20 @@ public class Main extends Application {
 		int seuil = 0;
 		int largeur = 5;
 		
-		// niveau de gris
+		// Niveau de gris
+		
 		ImgUtil.enNiveauDeGris(img);
 		ImgUtil.enNiveauDeGris(imgNivGris);
+		ImgUtil.enNiveauDeGris(imgSeuillage);
 
-		// regler le contraste / Addition
+		// Regler le contraste / Addition
 		
 		
-		// recherche d'un bon seuil / Methode Otsu
-		seuil = ImgUtil.otsuMethod(ImgUtil.histogrammeEn255NivDeGris(img));
+		// Seuillage / Methode Otsu
 		
-		// Seuillage
-		ImgUtil.seuillage(img, seuil);						
-		ImgUtil.seuillage(imgSeuillage, seuil);						
+		img = ImgUtil.otsuMethod4(img);
+		imgSeuillage = ImgUtil.otsuMethod4(imgSeuillage);
+
 
 		// Reduction du bruit / Convolution / Gaussian blur (taille du noyau a determiner)
 		
