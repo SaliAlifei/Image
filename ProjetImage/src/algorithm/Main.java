@@ -59,14 +59,22 @@ public class Main extends Application {
 		
 		// remplissage (correction de l'image)		
 		
+		//fermeture
+		BufferedImage imgOuverture = ImgUtil.open(imgSeuillage, 5);
+		
+		//ouverture
+		BufferedImage imgFermeture = ImgUtil.close(imgOuverture, 4);
+		
 		// compter le nombre de composantes connexes
-		nbreDeMarche = ImgUtil.nbLignes(img,largeur,100,img.getWidth()/3);
+		nbreDeMarche = ImgUtil.nbLignes(imgFermeture,largeur,1000,img.getWidth()/4);
 	
 		
 		if(afficheImages) {
 			ImgUtil.imshow(ImgUtil.histogrammeProjection(imgHistProj, ImgUtil.histProj(imgHistProj)));
 			ImgUtil.imshow(imgSeuillage);
 			ImgUtil.imshow(imgNivGris);
+			ImgUtil.imshow(imgFermeture);
+			ImgUtil.imshow(imgOuverture);
 		}
 		
 		return nbreDeMarche;
