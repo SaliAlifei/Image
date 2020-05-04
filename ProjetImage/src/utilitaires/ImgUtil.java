@@ -536,7 +536,7 @@ public class ImgUtil {
 		return maxVal;
 	}
 	
-	public static BufferedImage convolve(BufferedImage img, int[][] mask, int mask_size) {
+	public static BufferedImage convolve(BufferedImage img, double [][] mask, int mask_size) {
 		
 		int rows = img.getHeight();
 		int cols = img.getWidth();
@@ -551,7 +551,7 @@ public class ImgUtil {
 	            for(int x=-1; x<2;x++){
 	                for(int y=-1;y<2;y++){
 	                	float pixel = (float) ((img.getRGB(j+y, i+x) >> 16) & 0xff);
-	                	conv_pix = conv_pix + (pixel * mask[x+1][y+1]);
+	                	conv_pix = (float) conv_pix + (pixel * mask[x+1][y+1]);
 	                	//System.out.println("\tmask " + mask[x+1][y+1] + "; conv pix " +conv_pix);
 	                }
 	            }
@@ -589,6 +589,36 @@ public class ImgUtil {
         
         return image;
 	}
+	
+	
+	public static BufferedImage  mettreEnNoirEtBlanc(BufferedImage img) {
+		int height = img.getHeight();
+		int width =img.getWidth();
+		System.out.println("dans la méthode mettre en Noir et blanc \nheight : "+height+", width : "+width);
+		
+		BufferedImage nvImg = ImgUtil.zeros(height, width);
+		
+		int[] noir = {0,0,0,255};
+		//int blanc = Color.WHITE.getRGB();
+		int [] blanc = {255,255,255,255};
+		
+		for(int i = 0 ; i < height ; i++) {
+			for(int j = 0 ; j<width;j++) {
+				
+				int p = img.getRGB(j,i); 
+			int r = (p>>16)&0xff;
+				if(r==255) {
+					nvImg.getRaster().setPixel(j, i, blanc);
+				}else {
+					nvImg.getRaster().setPixel(j, i, noir);
+				}
+				
+			}
+		}
+		
+		return nvImg;
+	}
+	
 
 	/**
 	 * compte le nombre de ligne d'un texte (ou le nombre de marche)
