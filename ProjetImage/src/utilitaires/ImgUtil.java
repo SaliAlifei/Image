@@ -551,7 +551,7 @@ public class ImgUtil {
 	            for(int x=-1; x<2;x++){
 	                for(int y=-1;y<2;y++){
 	                	float pixel = (float) ((img.getRGB(j+y, i+x) >> 16) & 0xff);
-	                	conv_pix = (float) conv_pix + (pixel * mask[x+1][y+1]);
+	                	conv_pix = (float) (conv_pix + (pixel * mask[x+1][y+1]));
 	                	//System.out.println("\tmask " + mask[x+1][y+1] + "; conv pix " +conv_pix);
 	                }
 	            }
