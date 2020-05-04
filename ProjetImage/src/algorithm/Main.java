@@ -35,6 +35,10 @@ public class Main extends Application {
 		int nbreDeMarche = 0;
 		int seuil = 0;
 		int largeur = 5;
+		double  [][] matriceconv = {{-1/256,-4/256,-6/256,-4/256,-1/256},
+					    {-4/256,-16/256,-24/256,-16/256,-4/256},
+					    {-6/256,-24/246,476/256,-24/256,-16/256},
+					    {-1/256,-4/256,-6/256,-4/256,-1/256}};
 		
 		// Niveau de gris
 		
@@ -52,7 +56,10 @@ public class Main extends Application {
 
 
 		// Reduction du bruit / Convolution / Gaussian blur (taille du noyau a determiner)
-		
+		// l'image imgconv sort en blanc et jaune fluorescent
+		BufferedImage imgconv = ImgUtil.convolve(imgSeuillage, matriceconv, 5);
+		//mettre l'image nbImgConv en noir et blanc, non en niveau de gris 
+		BufferedImage nvImgConv=ImgUtil.mettreEnNoirEtBlanc(imgconv);
 		
 		// Recherche de contours / Convolution / Sobel Operator
 			// ImgUtil.convolution(imgBuff, matriceConv);
@@ -60,17 +67,17 @@ public class Main extends Application {
 		// remplissage (correction de l'image)		
 		
 		//fermeture
-		BufferedImage imgOuverture = ImgUtil.open(imgSeuillage, 5);
+		BufferedImage imgOuverture = ImgUtil.open(nvImgConv, 2);
 		
 		//ouverture
-		BufferedImage imgFermeture = ImgUtil.close(imgOuverture, 4);
+		BufferedImage imgFermeture = ImgUtil.close(imgOuverture, 3);
 		
 		// compter le nombre de composantes connexes
 		nbreDeMarche = ImgUtil.nbLignes(imgFermeture,largeur,1000,img.getWidth()/4);
 	
 		
 		if(afficheImages) {
-			ImgUtil.imshow(ImgUtil.histogrammeProjection(imgHistProj, ImgUtil.histProj(imgHistProj)));
+			ImgUtil.imshow(ImgUtil.histogrammeProjection(imgFermeture, ImgUtil.histProj(imgFermeture)));
 			ImgUtil.imshow(imgSeuillage);
 			ImgUtil.imshow(imgNivGris);
 			ImgUtil.imshow(imgFermeture);
