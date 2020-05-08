@@ -31,7 +31,7 @@ public class Main extends Application {
 		BufferedImage imgNivGris = ImgUtil.duplicate(img);
 		BufferedImage imgSeuillage = ImgUtil.duplicate(img);
 		int nbreDeMarche = 0;
-		int largeur = 5;
+		int largeur = 2;
 		
 		
 		// Niveau de gris
