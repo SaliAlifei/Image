@@ -355,6 +355,11 @@ public class ImgUtil {
 				);
 	}
 	
+	/**
+	 * retourne l'histogramme sous forme d'image à partir du tableau contenant les valeurs de l'histogramme
+	 * @param histogramme tableau
+	 * @return image
+	 */
 	public static BufferedImage histToImg(int [] histogramme) {
 		// 256*2 = 512
 		int iter = 2 ;
