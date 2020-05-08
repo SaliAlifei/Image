@@ -758,41 +758,6 @@ public class ImgUtil {
 	}
 	
 	/**
-	 * ne marche pas
-	 * @param img
-	 * @return
-	 */
-	static BufferedImage egalisation(BufferedImage img) {
-		
-		// contourner le warning
-		int nbNiv = 0;
-		int nbPix = nbNiv;
-		nbPix = img.getHeight()*img.getWidth();
-		
-		int[] tab = histogrammeEn255NivDeGris(img);
-		for (int i=0;i<tab.length;i++) {
-			if (tab[i]!=0)
-				nbNiv++;
-		}
-
-		int[] C = histCum(img);
-
-		int[] c = {255,255,255,255};
-		for (int y = 0; y < img.getHeight() ; y++){
-			for (int x = 0; x < img.getWidth(); x++){
-				int p = img.getRGB(x,y); // r�cup�ration des couleurs RGB du pixel a la position (x, y)
-				int r = (p>>16)&0xff;
-				//c[0]= max(0,(255*(nbNiv/nbPix)*C[r])-1);
-				c[0]= (C[r]/nbPix)*255;
-				c[1]=c[0];
-				c[2]=c[0];
-				img.getRaster().setPixel(x, y, c);
-			}
-		}
-		return img;
-	}
-	
-	/**
 	 * retourne un tableau histogramme cummul�
 	 * @param img
 	 * @return
