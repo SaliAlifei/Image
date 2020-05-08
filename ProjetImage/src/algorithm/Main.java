@@ -35,10 +35,7 @@ public class Main extends Application {
 		int nbreDeMarche = 0;
 		int seuil = 0;
 		int largeur = 5;
-		double  [][] matriceconv = {{-1/256,-4/256,-6/256,-4/256,-1/256},
-					    {-4/256,-16/256,-24/256,-16/256,-4/256},
-					    {-6/256,-24/246,476/256,-24/256,-16/256},
-					    {-1/256,-4/256,-6/256,-4/256,-1/256}};
+		
 		
 		// Niveau de gris
 		
@@ -56,10 +53,8 @@ public class Main extends Application {
 
 
 		// Reduction du bruit / Convolution / Gaussian blur (taille du noyau a determiner)
-		// l'image imgconv sort en blanc et jaune fluorescent
-		BufferedImage imgconv = ImgUtil.convolve(imgSeuillage, matriceconv, 5);
-		//mettre l'image nbImgConv en noir et blanc, non en niveau de gris 
-		BufferedImage nvImgConv=ImgUtil.mettreEnNoirEtBlanc(imgconv);
+		
+		
 		
 		// Recherche de contours / Convolution / Sobel Operator
 			// ImgUtil.convolution(imgBuff, matriceConv);
